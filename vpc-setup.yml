@@ -115,16 +115,8 @@
     - name: Create nat gateway
       ec2_vpc_nat_gateway:
         state: "{{state}}" # not required. choices: present;absent. Ensure NAT Gateway is present or absent.
-        nat_gateway_id: # not required. The id AWS dynamically allocates to the NAT Gateway on creation. This is required when the absent option is present.
         subnet_id: "{{pubsub1_out.subnet.id}}" # not required. The id of the subnet to create the NAT Gateway in. This is required with the present option.
-        allocation_id: # not required. The id of the elastic IP allocation. If this is not passed and the eip_address is not passed. An EIP is generated for this NAT Gateway.
-        eip_address: # not required. The elastic IP address of the EIP you want attached to this NAT Gateway. If this is not passed and the allocation_id is not passed, an EIP is generated for this NAT Gateway.
         if_exist_do_not_create: true # not required. if a NAT Gateway exists already in the subnet_id, then do not create a new one.
-        release_eip: yes # not required. Deallocate the EIP from the VPC. Option is only valid with the absent state. You should use this with the wait option. Since you can not release an address while a delete operation is happening.
-        wait: yes # not required. Wait for operation to complete before returning.
-        wait_timeout: 300 # not required. How many seconds to wait for an operation to complete before timing out.
-        client_token: # not required. Optional unique token to be used during create to ensure idempotency. When specifying this option, ensure you specify the eip_address parameter as well otherwise any subsequent runs will fail.
-        debug_botocore_endpoint_logs: no # not required. Use a botocore.endpoint logger to parse the unique (rather than total) "resource:action" API calls made during a task, outputing the set to the resource_actions key in the task results. Use the aws_resource_action callback to output to total list made during a playbook. The ANSIBLE_DEBUG_BOTOCORE_LOGS environment variable may also be used.
         region: "{{region}}" # not required. The AWS region to use. If not specified then the value of the AWS_REGION or EC2_REGION environment variable, if any, is used. See U(http://docs.aws.amazon.com/general/latest/gr/rande.html#ec2_region)
       register: NATGW_out
 
