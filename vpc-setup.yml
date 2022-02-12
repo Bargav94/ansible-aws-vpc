@@ -84,3 +84,12 @@
         resource_tags:
           Name: vprofile-privsub3
       register: privsub3_out
+
+    - name: Internet gateway setup
+      ec2_vpc_igw:
+         vpc_id: "{{vpcout.vpc.id}}" # required. The VPC ID for the VPC in which to manage the Internet Gateway.
+         state: "{{state}}" # not required. choices: present;absent. Create or terminate the IGW         
+         region:  "{{region}}"# not required. The AWS region to use. If not specified then the value of the AWS_REGION or EC2_REGION environment variable, if any, is used. See U(http://docs.aws.amazon.com/general/latest/gr/rande.html#ec2_region)
+         resource_tags: 
+           NameL vprofile_IGW
+      register: igw_out
