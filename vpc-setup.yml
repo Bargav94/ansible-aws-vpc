@@ -111,3 +111,38 @@
         validate_certs: True # not required. When set to "no", SSL certificates will not be validated for boto versions >= 2.6.0.
         profile: # not required. Uses a boto profile. Only works with boto >= 2.24.0.
         region: "{{region}}" # not required. The AWS region to use. If not specified then the value of the AWS_REGION or EC2_REGION environment variable, if any, is used. See U(http://docs.aws.amazon.com/general/latest/gr/rande.html#ec2_region)
+
+    - name: Create nat gateway
+      ec2_vpc_nat_gateway:
+        state: "{{present}}" # not required. choices: present;absent. Ensure NAT Gateway is present or absent.
+        nat_gateway_id: # not required. The id AWS dynamically allocates to the NAT Gateway on creation. This is required when the absent option is present.
+        subnet_id: "{{pubsub1_out.subnet.id}}" # not required. The id of the subnet to create the NAT Gateway in. This is required with the present option.
+        allocation_id: # not required. The id of the elastic IP allocation. If this is not passed and the eip_address is not passed. An EIP is generated for this NAT Gateway.
+        eip_address: # not required. The elastic IP address of the EIP you want attached to this NAT Gateway. If this is not passed and the allocation_id is not passed, an EIP is generated for this NAT Gateway.
+        if_exist_do_not_create: true # not required. if a NAT Gateway exists already in the subnet_id, then do not create a new one.
+        release_eip: yes # not required. Deallocate the EIP from the VPC. Option is only valid with the absent state. You should use this with the wait option. Since you can not release an address while a delete operation is happening.
+        wait: yes # not required. Wait for operation to complete before returning.
+        wait_timeout: 300 # not required. How many seconds to wait for an operation to complete before timing out.
+        client_token: # not required. Optional unique token to be used during create to ensure idempotency. When specifying this option, ensure you specify the eip_address parameter as well otherwise any subsequent runs will fail.
+        debug_botocore_endpoint_logs: no # not required. Use a botocore.endpoint logger to parse the unique (rather than total) "resource:action" API calls made during a task, outputing the set to the resource_actions key in the task results. Use the aws_resource_action callback to output to total list made during a playbook. The ANSIBLE_DEBUG_BOTOCORE_LOGS environment variable may also be used.
+        region: "{{region}}" # not required. The AWS region to use. If not specified then the value of the AWS_REGION or EC2_REGION environment variable, if any, is used. See U(http://docs.aws.amazon.com/general/latest/gr/rande.html#ec2_region)
+      register: NATGW_out
+
+    - name: Set up route table for private subnet
+      ec2_vpc_route_table:
+        vpc_id: "{{vpcout.vpc.id}}" # required. V P C   I D   o f   t h e   V P C   i n   w h i c h   t o   c r e a t e   t h e   r o u t e   t a b l e .
+        routes:
+          - dest: 0.0.0.0/0
+            gateway_id: "{{ NATGW_out.nat_gateway_id }}"
+        state: "{{state}}" # not required. choices: present;absent. C r e a t e   o r   d e s t r o y   t h e   V P C   r o u t e   t a b l e
+        subnets:
+          - "{{privsub1_out.subnet.id}}"
+          - "{{privsub2_out.subnet.id}}"
+          - "{{privsub3_out.subnet.id}}"
+        tags: # not required. A   d i c t i o n a r y   o f   r e s o u r c e   t a g s   o f   t h e   f o r m :   {   t a g 1 :   v a l u e 1 ,   t a g 2 :   v a l u e 2   } .   T a g s   a r e   u s e d   t o   u n i q u e l y   i d e n t i f y   r o u t e   t a b l e s   w i t h i n   a   V P C   w h e n   t h e   r o u t e _ t a b l e _ i d   i s   n o t   s u p p l i e d .
+          Name: Vprofile-PrivRT
+
+        validate_certs: True # not required. When set to "no", SSL certificates will not be validated for boto versions >= 2.6.0.
+        profile: # not required. Uses a boto profile. Only works with boto >= 2.24.0.
+        region: "{{region}}" # not required. The AWS region to use. If not specified then the value of the AWS_REGION or EC2_REGION environment variable, if any, is used. See U(http://docs.aws.amazon.com/general/latest/gr/rande.html#ec2_region)
+      register: privRt_out
