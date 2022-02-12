@@ -114,7 +114,7 @@
 
     - name: Create nat gateway
       ec2_vpc_nat_gateway:
-        state: "{{present}}" # not required. choices: present;absent. Ensure NAT Gateway is present or absent.
+        state: "{{state}}" # not required. choices: present;absent. Ensure NAT Gateway is present or absent.
         nat_gateway_id: # not required. The id AWS dynamically allocates to the NAT Gateway on creation. This is required when the absent option is present.
         subnet_id: "{{pubsub1_out.subnet.id}}" # not required. The id of the subnet to create the NAT Gateway in. This is required with the present option.
         allocation_id: # not required. The id of the elastic IP allocation. If this is not passed and the eip_address is not passed. An EIP is generated for this NAT Gateway.
