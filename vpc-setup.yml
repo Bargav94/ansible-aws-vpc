@@ -93,3 +93,21 @@
         resource_tags:
           Name: vprofile_IGW
       register: igw_out
+
+    - name: Set up route table
+      ec2_vpc_route_table:
+        vpc_id: "{{vpcout.vpc.id}}" # required. V P C   I D   o f   t h e   V P C   i n   w h i c h   t o   c r e a t e   t h e   r o u t e   t a b l e .
+        routes:
+          - dest: 0.0.0.0/0
+            gateway_id: { { igw_out.gateway_id } }
+        state: "{{state}}" # not required. choices: present;absent. C r e a t e   o r   d e s t r o y   t h e   V P C   r o u t e   t a b l e
+        subnets:
+          - "{{pubsub1_out.subnet.id}}"
+          - "{{pubsub2_out.subnet.id}}"
+          - "{{pubsub3_out.subnet.id}}"
+        tags: # not required. A   d i c t i o n a r y   o f   r e s o u r c e   t a g s   o f   t h e   f o r m :   {   t a g 1 :   v a l u e 1 ,   t a g 2 :   v a l u e 2   } .   T a g s   a r e   u s e d   t o   u n i q u e l y   i d e n t i f y   r o u t e   t a b l e s   w i t h i n   a   V P C   w h e n   t h e   r o u t e _ t a b l e _ i d   i s   n o t   s u p p l i e d .
+          Name: Vprofile-PubRT
+
+        validate_certs: True # not required. When set to "no", SSL certificates will not be validated for boto versions >= 2.6.0.
+        profile: # not required. Uses a boto profile. Only works with boto >= 2.24.0.
+        region: "{{region}}" # not required. The AWS region to use. If not specified then the value of the AWS_REGION or EC2_REGION environment variable, if any, is used. See U(http://docs.aws.amazon.com/general/latest/gr/rande.html#ec2_region)
