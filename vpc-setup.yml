@@ -120,8 +120,8 @@
         region: "{{region}}" # not required. The AWS region to use. If not specified then the value of the AWS_REGION or EC2_REGION environment variable, if any, is used. See U(http://docs.aws.amazon.com/general/latest/gr/rande.html#ec2_region)
       register: NATGW_out
 
-    - debug:
-      var: NATGW_out # not required. A variable name to debug. Mutually exclusive with the C(msg) option. Be aware that this option already runs in Jinja2 context and has an implicit C({{ }}) wrapping, so you should not be using Jinja2 delimiters unless you are looking for double interpolation.
+       debug:
+        var: NATGW_out # not required. A variable name to debug. Mutually exclusive with the C(msg) option. Be aware that this option already runs in Jinja2 context and has an implicit C({{ }}) wrapping, so you should not be using Jinja2 delimiters unless you are looking for double interpolation.
 
     - name: Set up route table for private subnet
       ec2_vpc_route_table:
