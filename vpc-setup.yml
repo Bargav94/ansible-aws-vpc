@@ -99,7 +99,7 @@
         vpc_id: "{{vpcout.vpc.id}}" # required. V P C   I D   o f   t h e   V P C   i n   w h i c h   t o   c r e a t e   t h e   r o u t e   t a b l e .
         routes:
           - dest: 0.0.0.0/0
-            gateway_id: { { igw_out.gateway_id } }
+            gateway_id: "{{ igw_out.gateway_id }}"
         state: "{{state}}" # not required. choices: present;absent. C r e a t e   o r   d e s t r o y   t h e   V P C   r o u t e   t a b l e
         subnets:
           - "{{pubsub1_out.subnet.id}}"
