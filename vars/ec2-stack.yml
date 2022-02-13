@@ -1,0 +1,24 @@
+- name: Setup Bastion hostname
+  hosts: localhost
+  connection: local
+  gather_facts: no
+  tasks:
+    - name: Import vpc variables
+      include_vars: var/output_vars
+
+    - name: IMport AMI variable
+      include_vars: vars/ec2stacksetup
+
+    - name: create private key
+      ec2_key:
+        name: vprofile-stack-key # required. Name of the key pair.
+        state: "{{state}}" # not required. choices: present;absent. create or delete keypair
+        region: "{{region}}"
+      register: vprokey_out
+
+    - name: save private key
+      copy:
+        content: "{{vprokey_out.key.private_key}}"
+        dest: "./loginkey_vpro.pem"
+        mode: 0600
+      when: vprokey_out.changed
