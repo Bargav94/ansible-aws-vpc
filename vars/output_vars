@@ -9,3 +9,5 @@ igwid: igw-0c76817339e445c88
 pubRTid: rtb-06435a6530c22fa2a
 NATGWid: nat-0109d0e087a0339d9
 privRTid: rtb-01ee2fce127abff12
+region: us-east-1
+BastionSGid: tobefilled

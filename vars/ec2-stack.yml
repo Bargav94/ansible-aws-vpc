@@ -22,3 +22,46 @@
         dest: "./loginkey_vpro.pem"
         mode: 0600
       when: vprokey_out.changed
+
+    - name: securtity group for load balancer
+      ec2_group:
+        name: vprofileELB-sg
+        description: Allow port from anywhere
+        region: "{{region}}"
+        vpc_id: "{{vpcid}}"
+      rules:
+        - proto: tcp
+          from_port: 80
+          to_port: 80
+          cidr_ip: 0.0.0.0/0
+      register: vproELBSG_out
+
+    - name: securtity group for load balancer
+      ec2_group:
+        name: vproStack-sg
+        description: Allow port 22 from anywhere
+        region: "{{region}}"
+        vpc_id: "{{vpcid}}"
+        purge_rules: no
+      rules:
+        - proto: tcp
+          from_port: 80
+          to_port: 80
+          group_id: "{{vproELBSG_out.group_id}}"
+
+        - proto: tcp
+          from_port: 22
+          to_port: 22
+          group_id: "{{BastionSGid}}"
+      register: vproStackSG_out
+
+    - name: Update security group with its own sg id
+      ec2_group:
+        name: vproStack-sg
+        description: Allow 22 within
+        region: "{{region}}"
+        vpc_id: "{{vpcid}}"
+        purge_rules: no
+        rules:
+          - proto: all
+            group_id: "{{vproStackSG_out.group_id}}"

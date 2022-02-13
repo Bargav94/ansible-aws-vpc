@@ -58,3 +58,10 @@
         group_id: "{{BastionSG_out.group_id}}"
         vpc_subnet_id: "{{pubsub1id}}"
       register: bastionHost_out
+
+    - name: Inset/updage BastionSGid in vars/output_vars
+      blockinfile:
+        path: vars/output_vars # required. The file to modify. Before Ansible 2.3 this option was only usable as I(dest), I(destfile) and I(name).
+        block: |
+          BastionSGid: {{BastionSG_out.group_id}}
+        backup: yes # not required. Create a backup file including the timestamp information so you can get the original file back if you somehow clobbered it incorrectly.
