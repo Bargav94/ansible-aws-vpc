@@ -171,3 +171,43 @@
           - "{{pubsub1id}}"
           - "{{pubsub2id}}"
           - "{{pubsub3id}}"
+
+    - name: Insert/update inventory
+      blockinfile:
+        path: provision-stack/inventory_pro # required. The file to modify. Before Ansible 2.3 this option was only usable as I(dest), I(destfile) and I(name).
+        block: web01 ansible_host={{web01_out.tagged_instances[0].id}}
+          app01 ansible_host={{app01_out.tagged_instances[0].id}}
+          rmq01 ansible_host={{rmq01_out.tagged_instances[0].id}}
+          mc01 ansible_host={{mc01_out.tagged_instances[0].id}}
+          db01 ansible_host={{db01_out.tagged_instances[0].id}}
+          cntl ansible_host=127.0.0.1 ansible_connection=local
+
+          [websrvgrp]
+          web01
+
+          [appsrvgrp]
+          app01
+
+          [rmqsrvgrp]
+          rmq01
+
+          [mcsrvgrp]
+          mc01
+
+          [dbsrvgrp]
+          db01
+
+          [control]
+          cntl
+
+          [stack_inst:children]
+          websrvgrp
+          appsrvgrp
+          rmqsrvgrp
+          mcsrvgrp
+          dbsrvgrp
+          control
+
+          [stack_inst:vars]
+          ansible_user= ubuntu
+          ansible_ssh_private_key_file= loginkey_vpro.pem
