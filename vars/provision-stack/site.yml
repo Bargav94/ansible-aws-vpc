@@ -1,0 +1,23 @@
+- name: BUild Artifact
+  import_playbook: build.yml
+
+- name: set hosts to ip mapping in /etc/hosts file
+  import_playbook: set_host_ip_map.yml
+
+- name: Setup db
+  import_playbook: db.yml
+
+- name: Setup SQL file on db server
+  import_playbook: dbdeploy.yml
+
+- name: Setup memcache
+  import_playbook: memcache.yml
+
+- name: setup rabbitmq
+  import_playbook: rabbitmq.yml
+
+- name: setup tomcat
+  import_playbook: appserver.yml
+
+- name: setup nginx
+  import_playbook: web.yml
