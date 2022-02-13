@@ -65,3 +65,109 @@
         rules:
           - proto: all
             group_id: "{{vproStackSG_out.group_id}}"
+
+    - name: Create Nginx Web01
+      ec2:
+        key_name: vprofile-stack-key
+        region: "{{region}}"
+        instance_type: t2.micro
+        image: "{{nginx_ami}}"
+        wait: yes
+        wait_timeout: 300
+        instance_tags:
+          Name: "Web01"
+        exact_count: 1
+        count_tag:
+          Name: "web01"
+          Project: vprofile
+        group_id: "{{vproStackSG_out.group_id}}"
+        vpc_subnet_id: "{{privsub1id}}"
+      register: web01_out
+
+    - name: Create Tomcat App01
+      ec2:
+        key_name: vprofile-stack-key
+        region: "{{region}}"
+        instance_type: t2.micro
+        image: "{{tomcat_ami}}"
+        wait: yes
+        wait_timeout: 300
+        instance_tags:
+          Name: "app01"
+        exact_count: 1
+        count_tag:
+          Name: "app01"
+          Project: vprofile
+        group_id: "{{vproStackSG_out.group_id}}"
+        vpc_subnet_id: "{{privsub1id}}"
+      register: app01_out
+
+    - name: Create Memcached mc01
+      ec2:
+        key_name: vprofile-stack-key
+        region: "{{region}}"
+        instance_type: t2.micro
+        image: "{{memcache_ami}}"
+        wait: yes
+        wait_timeout: 300
+        instance_tags:
+          Name: "mc01"
+        exact_count: 1
+        count_tag:
+          Name: "mc01"
+          Project: vprofile
+        group_id: "{{vproStackSG_out.group_id}}"
+        vpc_subnet_id: "{{privsub1id}}"
+      register: mc01_out
+
+    - name: Create RabbitMQ rq01
+      ec2:
+        key_name: vprofile-stack-key
+        region: "{{region}}"
+        instance_type: t2.micro
+        image: "{{rmq_ami}}"
+        wait: yes
+        wait_timeout: 300
+        instance_tags:
+          Name: "rmq01"
+        exact_count: 1
+        count_tag:
+          Name: "rmq01"
+          Project: vprofile
+        group_id: "{{vproStackSG_out.group_id}}"
+        vpc_subnet_id: "{{privsub1id}}"
+      register: rmq01_out
+
+    - name: Create Mysql db01
+      ec2:
+        key_name: vprofile-stack-key
+        region: "{{region}}"
+        instance_type: t2.micro
+        image: "{{mysql_ami}}"
+        wait: yes
+        wait_timeout: 300
+        instance_tags:
+          Name: "db01"
+        exact_count: 1
+        count_tag:
+          Name: "db01"
+          Project: vprofile
+        group_id: "{{vproStackSG_out.group_id}}"
+        vpc_subnet_id: "{{privsub1id}}"
+      register: db01_out
+
+    - local_action:
+        module: ec2_elb_lb
+        state: "{{state}}" # required. choices: absent;present. Create or destroy the ELB
+        name: "vprofile-elb" # required. The name of the ELB
+        listeners:
+          - protocol: http
+            load_balancer_port: 80
+            instance_port: 80
+        purge_listeners: true # not required. Purge existing listeners on ELB that are not found in listeners
+        instance_ids: "{{web01_out.tagged_instances[0].id}}" # not required. List of instance ids to attach to this ELB
+        security_group_ids: "{{vproELBSG_out.group_id}}"
+        subnets:
+          - "{{pubsub1id}}"
+          - "{{pubsub2id}}"
+          - "{{pubsub3id}}"
