@@ -111,7 +111,7 @@
         validate_certs: True # not required. When set to "no", SSL certificates will not be validated for boto versions >= 2.6.0.
         profile: # not required. Uses a boto profile. Only works with boto >= 2.24.0.
         region: "{{region}}" # not required. The AWS region to use. If not specified then the value of the AWS_REGION or EC2_REGION environment variable, if any, is used. See U(http://docs.aws.amazon.com/general/latest/gr/rande.html#ec2_region)
-
+      register: pubRT_out
     - name: Create nat gateway
       ec2_vpc_nat_gateway:
         state: "{{state}}" # not required. choices: present;absent. Ensure NAT Gateway is present or absent.
@@ -141,3 +141,18 @@
         profile: # not required. Uses a boto profile. Only works with boto >= 2.24.0.
         region: "{{region}}" # not required. The AWS region to use. If not specified then the value of the AWS_REGION or EC2_REGION environment variable, if any, is used. See U(http://docs.aws.amazon.com/general/latest/gr/rande.html#ec2_region)
       register: privRt_out
+
+    - debug:
+        var: "{{item}}"
+      loop:
+        - vpcout.vpc.id
+        - pubsub1_out.subnet.id
+        - pubsub2_out.subnet.id
+        - pubsub3_out.subnet.id
+        - privsub1_out.subnet.id
+        - privsub2_out.subnet.id
+        - privsub3_out.subnet.id
+        - igw_out.gateway_id
+        - pubRT_out.route_table.id
+        - NATGW_out.nat_gateway_id
+        - privRt_out.route_table.id
