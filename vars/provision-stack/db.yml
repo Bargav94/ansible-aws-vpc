@@ -1,0 +1,59 @@
+- name: setup mysql
+  hosts: dbsrvgrp
+  gather_facts: no
+  tasks:
+    - name: Installing mysql service
+      package:
+        name: "{{item}}" # required. Package name, or package specifier with version. Syntax varies with package manager. For example C(name-1.0) or C(name=1.0). Package names also vary with package manager; this module will not "translate" them per distro. For example C(libyaml-dev), C(libyaml-devel).
+        state: "{{state}}" # required. Whether to install (C(present)), or remove (C(absent)) a package. You can use other states like C(latest) ONLY if they are supported by the underlying package module(s) executed.
+        update_cache: yes
+        cache_valid_time: 86400
+      loop:
+        - mysql-server
+        - mysql-client
+        - python-mysqldb
+        - python3-mysqldb
+        - libmysqlclient-dev
+      ignore_error: yes
+      tags:
+        - package
+
+    - name: start and enable mysql service
+      service:
+        name: mysql
+        state: started
+        enabled: yes
+      tags:
+        - svc
+
+    - name: creating mysql user
+      mysql_user:
+        name: "{{dbuser}}" # required. Name of the user (role) to add or remove.
+        password: "{{dbpass}}" # not required. Set the user's password..
+        priv: "*.*:ALL"
+        host: "%"
+        state: present
+
+    - name: creating db
+      mysql_db:
+        name: "{{dbname}}"
+        state: present
+
+    - name: Enable remote login to mysql
+      lineinfile:
+        path: "path" # required. The file to modify. Before Ansible 2.3 this option was only usable as I(dest), I(destfile) and I(name).
+        regexp: "^text" # not required. The regular expression to look for in every line of the file. For C(state=present), the pattern to replace if found. Only the last line found will be replaced. For C(state=absent), the pattern of the line(s) to remove. If the regular expression is not matched, the line will be added to the file in keeping with C(insertbefore) or C(insertafter) settings. When modifying a line the regexp should typically match both the initial state of the line as well as its state after replacement by C(line) to ensure idempotence. Uses Python regular expressions. See U(http://docs.python.org/2/library/re.html).
+        state: present # not required. choices: absent;present. Whether the line should be there or not.
+        line: "bind-address = 0.0.0.0" # not required. The line to insert/replace into the file. Required for C(state=present). If C(backrefs) is set, may contain backreferences that will get expanded with the C(regexp) capture groups if the regexp matches.
+        backup: yes
+      notify:
+        - Restart mysql
+
+      tags:
+        - conf
+
+  handlers:
+    - name: rtestart mysql
+      service:
+        name: mysql # required. Name of the service.
+        state: restarted # not required. choices: reloaded;restarted;started;stopped. C(started)/C(stopped) are idempotent actions that will not run commands unless necessary. C(restarted) will always bounce the service. C(reloaded) will always reload. B(At least one of state and enabled are required.) Note that reloaded will start the service if it is not already started, even if your chosen init system wouldn't normally.
