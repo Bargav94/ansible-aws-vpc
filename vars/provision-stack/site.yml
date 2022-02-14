@@ -1,5 +1,5 @@
 - name: BUild Artifact
-  import_playbook: build.yml
+  import_playbook: artifact_build.yml
 
 - name: set hosts to ip mapping in /etc/hosts file
   import_playbook: set_host_ip_map.yml

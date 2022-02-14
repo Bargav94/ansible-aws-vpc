@@ -1,0 +1,38 @@
+- name: Setup Bastion hostname
+  hosts: localhost
+  connection: local
+  become: yes
+  tasks:
+    - name: install jdk , maven,git
+      apt:
+        name: "{{item}}"
+        state: "{{state}}"
+        update_cache: yes
+      loop:
+        - git
+        - openjdk-9-jdk
+        - maven
+
+    - name: clone source code from git
+      git:
+        repo: "repo name"
+        dest: ./Vprofile-repo
+        version: vp-rem
+      register: git_status
+
+    - name: Run Maven
+      command: "mvn install"
+      args:
+        chdir: Vprofile-repo
+      when: git_status.changed
+      register: mvn_info
+    - name: copy artifact to files
+      copy:
+        src: "{{item}}"
+        dest: "files/ROOT.war"
+      with_fileglob: Vprofile-repo/target/*.war
+
+    - name: copysql files
+      copy:
+        src: Vprofile-repo/src/main/resources/db/backup.SQL
+        dest: files/db_backup.sql
